@@ -11,6 +11,18 @@ description: >-
   apps, plus an OpenAI-compatible chat-completions surface. A first-party Python SDK and an optional
   self-hosted Model Context Protocol server expose the same retrieval core to agents.
 url: https://raw.githubusercontent.com/api-evangelist/ragflow/refs/heads/main/apis.yml
+deliveryModel:
+  model: unknown
+  open_source: unknown
+  commercial: true
+  callable_host: false
+  label: Delivery model not determined — needs a product licence on record
+  confidence: low
+  source:
+  - pricing
+  - repository-unlicensed
+  generated: '2026-08-28'
+  method: derived
 image: https://ragflow.io/img/logo.svg
 x-type: company
 x-source: harvest:self-hosted-agent-stack
