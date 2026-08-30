@@ -1,0 +1,93 @@
+generated: '2026-08-27'
+method: searched
+source: https://ragflow.io/#pricing-plan
+note: >-
+  RAGFlow is dual-track. The engine itself is Apache-2.0 and free to self-host with no plan, no quota and
+  no key restriction; the plans below apply only to RAGFlow Cloud (cloud.ragflow.io). Prices were read
+  from the schema.org Product/PriceSpecification markup on the pricing section of ragflow.io. Each paid
+  tier shows a current price and a struck-through list price — both are per MONTH in USD
+  (itemprop unitText content="MONTH"); the struck-through figure is recorded as list_price.
+currency: USD
+billing_period: month
+plans:
+- name: Free
+  price: 0
+  list_price: null
+  currency: USD
+  period: month
+  api_access: false
+  api_note: The pricing page states "API key not available" on this tier.
+  included:
+    apps: 5
+    team_members: 1
+    dataset_storage_gb: 0.1
+    credits_per_month: 500
+  overage: not published
+- name: Starter
+  price: 29
+  list_price: 59
+  currency: USD
+  period: month
+  api_access: true
+  included:
+    apps: 50
+    team_members: 5
+    dataset_storage_gb: 5
+    credits_per_month: 5000
+  overage: not published
+- name: Pro
+  price: 129
+  list_price: 259
+  currency: USD
+  period: month
+  most_popular: true
+  api_access: true
+  included:
+    apps: unlimited
+    team_members: 20
+    dataset_storage_gb: 50
+    credits_per_month: 20000
+  overage: not published
+- name: Enterprise
+  price: null
+  currency: USD
+  period: null
+  contact_sales: true
+  contact_url: https://ragflow.io/contact-us
+  api_access: true
+  included:
+    deployment:
+    - BYOC deployment
+    - On-premises deployment
+    support: Dedicated support
+    sla: Custom SLA
+  overage: not published
+- name: Self-hosted (Apache-2.0)
+  price: 0
+  currency: USD
+  period: null
+  api_access: true
+  license: Apache-2.0
+  source: https://github.com/infiniflow/ragflow
+  included:
+    apps: unlimited
+    team_members: unlimited
+    dataset_storage_gb: unlimited
+    credits_per_month: null
+  note: >-
+    Not a listed plan; recorded because it is the primary way RAGFlow is consumed and it carries none of
+    the Cloud limits. The operator supplies their own model-provider keys and their own infrastructure.
+plan_count: 5
+cloud_plan_count: 4
+metering:
+  unit: credits
+  window: month
+  note: >-
+    Credits are the metering unit on RAGFlow Cloud (500 / 5,000 / 20,000 per month by tier). The pricing
+    page does not define what one credit buys, publish an overage rate, or state what happens when the
+    monthly allowance is exhausted, and no credit balance is exposed through the HTTP API.
+gaps:
+- No published overage pricing or credit-exhaustion behaviour.
+- No definition of a credit in terms of documents parsed, chunks indexed or tokens consumed.
+- Free tier cannot issue an API key, so the API cannot be evaluated without a paid plan or a self-hosted
+  deployment.

@@ -1,0 +1,203 @@
+generated: '2026-08-27'
+method: searched
+source: https://ragflow.io/docs/http_api_reference + live probes of https://cloud.ragflow.io
+api: ragflow-http-api
+summary: >-
+  Cross-cutting runtime semantics for the RAGFlow HTTP API, read from the provider's own reference and
+  confirmed against live unauthenticated responses on RAGFlow Cloud. RAGFlow is a well-documented but
+  convention-light API: it has a single consistent auth scheme, a consistent pagination contract and a
+  consistent response envelope, and it has no idempotency, no rate-limit signalling, no request tracing
+  and no negotiated versioning.
+authentication:
+  style: bearer-token
+  header: 'Authorization: Bearer <YOUR_API_KEY>'
+  scheme: api-key carried as a bearer token
+  oauth2: false
+  issuance: >-
+    Issued from the RAGFlow UI (avatar -> API). On RAGFlow Cloud the Free plan cannot issue an API key
+    at all; Starter and above can.
+  scope_model: none
+  note: >-
+    One key per tenant. There are no scopes, no token expiry documented, and no refresh flow. The MCP
+    server reuses the same key.
+  docs: https://ragflow.io/docs/acquire_ragflow_api_key
+idempotency:
+  supported: false
+  header: null
+  scope: null
+  retention: null
+  evidence: >-
+    The 238KB HTTP API reference contains zero occurrences of "idempoten". No Idempotency-Key header is
+    accepted or documented on any of the 95 operations.
+  agent_impact: >-
+    A retried POST /api/v1/datasets, POST /api/v1/chats or document upload will create a duplicate. The
+    only defence available to a client is to list-then-create, and dataset names are not documented as
+    unique (folder names ARE — a duplicate folder returns code 409).
+pagination:
+  style: page-number
+  params:
+  - name: page
+    default: 1
+    description: 1-indexed page number.
+  - name: page_size
+    default: 30
+    description: >-
+      Items per page. Default is 30 on most list endpoints; List datasets documents a default of 30,
+      the MCP ragflow_list_datasets tool defaults to 100 and caps at 1000.
+  - name: orderby
+    default: create_time
+    description: 'Sort field. Documented options: create_time, update_time.'
+  - name: desc
+    default: true
+    description: Descending order when true.
+  response_fields:
+  - total
+  cursor: false
+  link_header: false
+  applies_to: >-
+    List datasets, List documents, List chunks, List chat assistants, List sessions, List agents,
+    List memories, List messages, List files, List search apps.
+  note: >-
+    No cursor or continuation token is offered, so deep pagination over a mutating dataset can skip or
+    repeat rows. There is no Link header and no next/prev in the body.
+filtering:
+  style: query-parameters
+  common:
+  - keywords
+  - id
+  - name
+  - owner_ids
+  advanced:
+  - name: metadata_condition
+    description: >-
+      A JSON filter object with `logic` (and/or) and `conditions[]` of {name, comparison_operator,
+      value}, accepted on List documents, Retrieve chunks and the OpenAI-compatible completions
+      endpoint via extra_body.
+  - name: create_time_from / create_time_to
+    description: Timestamp range filters on List documents.
+  - name: suffix / run
+    description: File-extension and parse-status filters on List documents.
+field_expansion:
+  supported: false
+  note: >-
+    No `expand` or sparse-fieldset parameter. The closest analogue is
+    `include_parsing_status=true` on List datasets, which adds unstart_count / running_count /
+    cancel_count / done_count / fail_count to each dataset object.
+metadata:
+  supported: true
+  note: >-
+    Documents carry arbitrary user metadata. GET /api/v1/datasets/{dataset_id}/metadata/summary returns
+    the key/value inventory for a dataset and POST /api/v1/datasets/{dataset_id}/metadata/update
+    mutates or deletes it. Metadata is queryable at retrieval time through metadata_condition.
+request_tracing:
+  request_id_header: null
+  supported: false
+  evidence: >-
+    No X-Request-Id, X-Correlation-Id or traceparent is documented, and none appears in live response
+    headers from cloud.ragflow.io (observed headers: server, date, content-type, content-length, vary,
+    via).
+  note: >-
+    Chat completions return an `id` of the form `chatcmpl-<uuid>` in the body, which is the only
+    correlatable identifier the API emits, and it exists only on the completions surface.
+versioning:
+  style: uri-path
+  current: /api/v1
+  header_negotiation: false
+  server_version_coupled: true
+  note: >-
+    The path version has stayed at v1 while the product moved from 0.18 to 0.27. The real contract
+    version is the RAGFlow SERVER version, which the client picks by choosing a Docker image — the
+    self-hosted deployment model means each operator runs a different contract. RAGFlow Cloud tracks
+    the current release. GET /api/v1/system/healthz is unauthenticated and is the only capability probe.
+  deprecation: See lifecycle/ragflow-lifecycle.yml — a 20-row deprecated-alias table with a documented
+    backward-compatibility layer.
+error_envelope:
+  shape: '{"code": <int>, "data": <object|null>, "message": <string>, "error": <string, optional>}'
+  success_code: 0
+  http_status_authoritative: false
+  rfc9457: false
+  note: >-
+    HTTP status and body `code` disagree by design on handler-level failures. Clients must branch on
+    `code`, not on the status line. Full catalogue in errors/ragflow-error-codes.yml.
+rate_limit_signaling:
+  headers: []
+  status_on_exhaustion: null
+  documented: false
+  evidence: >-
+    No X-RateLimit-*, RateLimit-* or Retry-After header appears on live 200 or 401 responses from
+    cloud.ragflow.io, and the reference documents no 429. Metering on RAGFlow Cloud is by monthly
+    credits per plan, surfaced in the console rather than in response headers.
+  see: rate-limits/ragflow-rate-limits.yml
+dry_run_mode:
+  supported: false
+  note: >-
+    No preview/validate/dry-run parameter on any write operation. The nearest analogue is the retrieval
+    test path (POST /api/v1/retrieval), which is read-only by nature and lets an agent rehearse a query
+    before wiring it into a chat assistant.
+reversibility:
+  grade: documented
+  credit: 0.4
+  note: >-
+    RAGFlow has real reversal paths for its long-running INGESTION operations, and none at all for its
+    destructive ones. No window is stated anywhere in the reference for any reversal, which is why this
+    grades `documented` and not `verified`. NOTHING BELOW ASSERTS A WINDOW THE DOCS DO NOT STATE.
+  write_surfaces:
+  - surface: Document parsing
+    action: POST /api/v1/datasets/{dataset_id}/chunks (Parse documents)
+    reversal: DELETE /api/v1/datasets/{dataset_id}/chunks (Stop parsing documents)
+    operation_id: null
+    window: null
+    window_note: >-
+      Reversible only while parsing is in flight; the reference states no time bound and no terminal
+      state after which the call is refused. A stopped document reports run status CANCEL.
+    docs: https://ragflow.io/docs/http_api_reference
+  - surface: Pipeline ingestion
+    action: POST /api/v1/documents/ingest with run="1"
+    reversal: POST /api/v1/documents/ingest with run="2"
+    operation_id: null
+    window: null
+    window_note: >-
+      run="2" cancels ingestion. `delete: true` additionally purges existing tasks and chunks before a
+      rerun. No time bound is documented.
+    docs: https://ragflow.io/docs/http_api_reference
+  - surface: Memory messages
+    action: POST /api/v1/messages (Add Message)
+    reversal: DELETE /api/v1/messages/{memory_id}:{message_id} (Forget Message)
+    operation_id: null
+    window: null
+    window_note: >-
+      Forget removes a message from a memory. The reference does not say whether the underlying content
+      is purged or only unlinked, and states no window.
+  - surface: Workspace files
+    action: POST /api/v1/workspaces/{workspace_id}/commits (Create commit)
+    reversal: null
+    operation_id: null
+    window: null
+    window_note: >-
+      There is version HISTORY but no revert operation. GET /api/v1/workspace-files/{file_id}/versions,
+      GET /api/v1/workspaces/{workspace_id}/commits/{commit_id}/files/{file_id}/content and
+      GET /api/v1/workspaces/{workspace_id}/commits/diff let a client READ a prior version and
+      re-upload it, but no first-party rollback endpoint exists.
+  irreversible:
+  - DELETE /api/v1/datasets — deleting a dataset destroys its documents and chunks; no restore endpoint
+    and no trash/recycle surface is documented.
+  - DELETE /api/v1/datasets/{dataset_id}/documents
+  - DELETE /api/v1/datasets/{dataset_id}/documents/{document_id}/chunks
+  - DELETE /api/v1/datasets/{dataset_id}/knowledge_graph
+  - DELETE /api/v1/chats and DELETE /api/v1/chats/{chat_id}
+  - DELETE /api/v1/agents/{agent_id}
+  - DELETE /api/v1/memories/{memory_id}
+  - DELETE /api/v1/files
+  - DELETE /api/v1/searches/{search_id}
+  agent_impact: >-
+    Every delete in this API is terminal as far as the published contract goes. InfiniFlow's own
+    published Agent Skill compensates for this in prose rather than in the contract: it instructs the
+    agent to list the exact items and require explicit user confirmation before any delete, and to
+    resolve fuzzy names to IDs first. That guardrail is the strongest reversibility signal RAGFlow
+    ships, and it lives in a skill file, not in the API.
+cross_references:
+  errors: errors/ragflow-error-codes.yml
+  lifecycle: lifecycle/ragflow-lifecycle.yml
+  authentication: authentication/ragflow-authentication.yml
+  rate_limits: rate-limits/ragflow-rate-limits.yml
+  plans: plans/ragflow-plans-pricing.yml

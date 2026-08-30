@@ -1,0 +1,75 @@
+generated: '2026-08-27'
+method: searched
+source: https://ragflow.io/docs/acquire_ragflow_api_key + https://ragflow.io/docs/http_api_reference
+docs: https://ragflow.io/docs/acquire_ragflow_api_key
+api: ragflow-http-api
+summary: >-
+  A single authentication scheme covers the entire RAGFlow surface: a tenant-scoped API key presented as
+  an HTTP bearer token. There is no OAuth 2.0, no OpenID Connect, no mutual TLS, no signed requests and
+  no scope system. The same key authenticates the HTTP API, the Python SDK and the MCP server.
+schemes:
+- id: bearerApiKey
+  type: http
+  scheme: bearer
+  in: header
+  name: Authorization
+  format: 'Authorization: Bearer <YOUR_API_KEY>'
+  applies_to: all 95 documented operations except GET /api/v1/system/healthz
+  description: >-
+    A RAGFlow API key issued per tenant from the RAGFlow UI (avatar in the top-right corner -> API).
+    The reference presents this header on every request example in the document.
+  rotation: >-
+    Keys are created and revoked from the same UI page. No rotation policy, expiry or grace period is
+    documented, and there is no API to mint or revoke a key.
+  expiry: not documented
+  scopes: []
+  scope_model: none
+unauthenticated_operations:
+- operation: GET /api/v1/system/healthz
+  note: >-
+    Verified live on 2026-08-27 — https://cloud.ragflow.io/api/v1/system/healthz returns HTTP 200 with
+    {"db":"ok","doc_engine":"ok","redis":"ok","status":"ok","storage":"ok"} without any Authorization
+    header.
+oauth2: false
+openid_connect: false
+mutual_tls: false
+webhook_signing: not applicable — RAGFlow publishes no webhooks
+failure_behaviour:
+  missing_or_invalid_key:
+    http_status: 401
+    body: '{"code":401,"data":null,"message":"<Unauthorized ''401: Unauthorized'' >"}'
+    observed_at: https://cloud.ragflow.io/api/v1/datasets?page=1&page_size=1
+    observed_on: '2026-08-27'
+    www_authenticate_header: false
+  handler_level:
+    code: 109
+    message: no authorization
+  insufficient_permission:
+    code: 108
+    message: tenant lacks permission for the named datasets
+  not_owner:
+    code: 103
+    message: Only owner of canvas authorized for this operation.
+availability:
+  self_hosted: >-
+    Any RAGFlow deployment can issue API keys — this is the full-capability path, and the reason the
+    API surface is documented against http://{address}/api/v1.
+  cloud:
+    free: false
+    free_note: >-
+      The RAGFlow Cloud pricing page states "API key not available" on the Free plan. A Cloud evaluator
+      cannot call the API without paying, which is the single largest onboarding friction on this
+      provider.
+    starter: true
+    pro: true
+    enterprise: true
+multi_tenancy:
+  model: >-
+    A key is bound to one tenant. The MCP server's self-host mode holds one key and therefore sees one
+    tenant's datasets; host mode requires each client to present its own key so each sees its own.
+gaps:
+- No scopes — a key that can read a dataset can also delete every dataset, chat assistant and agent in
+  the tenant. There is no read-only key.
+- No key expiry, no documented rotation policy, and no programmatic key management.
+- No WWW-Authenticate header on 401, so a client cannot discover the scheme from a challenge.
+- No OAuth or OIDC, so RAGFlow cannot participate in a delegated-consent agent flow.

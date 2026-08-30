@@ -1,0 +1,200 @@
+generated: '2026-08-27'
+method: derived
+source: https://ragflow.io/docs/http_api_reference
+note: >-
+  Derived from the response payloads and path structure documented in the RAGFlow HTTP API reference.
+  RAGFlow publishes no OpenAPI, so there are no components.schemas to walk; every entity and every
+  relationship below was read from a documented response example or from the resource nesting in the
+  path. Fields listed are those that actually appear in the reference's examples — nothing is inferred.
+id_format:
+  style: hex-uuid-no-dashes
+  length: 32
+  examples:
+  - 6e211ee0723611efa10a0242ac120007
+  - b330ec2e91ec11efbc510242ac120004
+  prefixed: false
+  note: >-
+    Ids are undelimited 32-character hex strings with NO type prefix, so an id is not
+    self-describing: a dataset id, a document id and a chunk id are indistinguishable out of context.
+    An agent that mixes them up gets code 102 "Invalid Dataset ID" rather than a typed error. Chunk ids
+    are the one exception in kind — they are content-derived rather than time-ordered UUIDs.
+timestamps:
+  pattern: paired
+  fields:
+  - create_time / update_time — epoch milliseconds (integer)
+  - create_date / update_date — human string, inconsistently formatted across endpoints
+    ("Sat, 14 Sep 2024 01:12:37 GMT" on some, "2026-03-09T18:57:13" on others)
+  note: The date-string format is not stable between endpoints; parse the epoch fields.
+entities:
+- name: Tenant
+  id_field: tenant_id
+  description: The account boundary. An API key is bound to exactly one tenant.
+  note: Never addressed directly by a path; appears as tenant_id / created_by on other objects.
+- name: Dataset
+  aka: knowledge base
+  id_field: id
+  path: /api/v1/datasets/{dataset_id}
+  fields: [id, name, avatar, description, language, embedding_model, chunk_method, parser_config,
+    permission, similarity_threshold, vector_similarity_weight, status, tenant_id, created_by,
+    chunk_count, document_count, token_num, create_time, update_time]
+  optional_fields: [unstart_count, running_count, cancel_count, done_count, fail_count]
+  optional_note: Present only when include_parsing_status=true.
+- name: Document
+  id_field: id
+  path: /api/v1/datasets/{dataset_id}/documents/{document_id}
+  fields: [id, name, location, dataset_id, created_by, chunk_method, chunk_count, parser_config,
+    run, create_time, update_time]
+  run_states: [UNSTART, RUNNING, CANCEL, DONE, FAIL]
+- name: Chunk
+  id_field: id
+  path: /api/v1/datasets/{dataset_id}/documents/{document_id}/chunks/{chunk_id}
+  fields: [id, content, document_id, docnm_kwd, image_id, important_keywords, tag_kwd, positions,
+    available]
+- name: Metadata
+  id_field: null
+  path: /api/v1/datasets/{dataset_id}/metadata
+  description: >-
+    Arbitrary key/value pairs attached to documents, summarised per dataset and queryable at retrieval
+    time via metadata_condition.
+- name: KnowledgeGraph
+  id_field: null
+  path: /api/v1/datasets/{dataset_id}/knowledge_graph
+  description: >-
+    A per-dataset derived artifact built by run_graphrag; singleton per dataset (no id, addressed by
+    the parent dataset). Deprecated in the UI at v0.27.0 in favour of Knowledge Compilation "Graph".
+- name: ChatAssistant
+  id_field: id
+  path: /api/v1/chats/{chat_id}
+  description: A configured assistant bound to one or more datasets, with its own model and prompt.
+- name: Session
+  id_field: id
+  path: /api/v1/chats/{chat_id}/sessions/{session_id}
+  fields: [id, name, chat_id, user_id, messages]
+- name: Message
+  id_field: msg_id
+  path: /api/v1/chats/{chat_id}/sessions/{session_id}/messages/{msg_id}
+  description: A turn within a session; supports deletion and feedback.
+- name: Agent
+  id_field: id
+  path: /api/v1/agents/{agent_id}
+  description: >-
+    A visual workflow. Agents have their own sessions, their own OpenAI-compatible completions endpoint
+    and their own attachments.
+- name: Memory
+  id_field: memory_id
+  path: /api/v1/memories/{memory_id}
+  description: A named memory store with a memory_type and storage_type, holding messages.
+- name: MemoryMessage
+  id_field: message_id
+  path: /api/v1/messages/{memory_id}:{message_id}
+  description: >-
+    A message inside a memory. Note the compound path key memory_id:message_id — a message is not
+    addressable without its parent memory.
+- name: File
+  id_field: file_id
+  path: /api/v1/files/{file_id}
+  description: >-
+    A file or folder in the tenant's file tree, independent of datasets until linked. Folders are the
+    same entity with a parent/child relationship.
+- name: Workspace
+  id_field: workspace_id
+  path: /api/v1/workspaces/{workspace_id}
+  description: A versioned file space with a git-like commit model.
+- name: Commit
+  id_field: commit_id
+  path: /api/v1/workspaces/{workspace_id}/commits/{commit_id}
+  description: An immutable snapshot of workspace files; supports tree, diff and per-file content reads.
+- name: SearchApp
+  id_field: search_id
+  path: /api/v1/searches/{search_id}
+  description: A configured search experience over datasets, with its own completions endpoint.
+relationships:
+- from: Tenant
+  to: Dataset
+  type: has_many
+  via: tenant_id
+- from: Tenant
+  to: File
+  type: has_many
+  via: created_by
+- from: Dataset
+  to: Document
+  type: has_many
+  via: dataset_id
+- from: Document
+  to: Chunk
+  type: has_many
+  via: document_id
+- from: Document
+  to: Dataset
+  type: belongs_to
+  via: dataset_id
+- from: Chunk
+  to: Document
+  type: belongs_to
+  via: document_id
+- from: Dataset
+  to: KnowledgeGraph
+  type: has_one
+  via: path nesting
+- from: Dataset
+  to: Metadata
+  type: has_one
+  via: path nesting
+- from: ChatAssistant
+  to: Dataset
+  type: has_many
+  via: dataset_ids on create/update
+- from: ChatAssistant
+  to: Session
+  type: has_many
+  via: chat_id
+- from: Session
+  to: Message
+  type: has_many
+  via: session path nesting
+- from: Agent
+  to: Session
+  type: has_many
+  via: agent_id
+- from: Memory
+  to: MemoryMessage
+  type: has_many
+  via: memory_id
+- from: File
+  to: File
+  type: has_many
+  via: parent_id
+  note: Self-referencing folder tree; /parent and /ancestors walk it upward.
+- from: File
+  to: Dataset
+  type: has_many
+  via: POST /api/v1/files/link-to-datasets
+  note: >-
+    A many-to-many link — one file can be converted into documents in several datasets. This is the
+    only join in the model that is created by an operation rather than by an id field.
+- from: Workspace
+  to: Commit
+  type: has_many
+  via: workspace_id
+- from: Commit
+  to: WorkspaceFile
+  type: has_many
+  via: commit path nesting
+- from: SearchApp
+  to: Dataset
+  type: has_many
+  via: configuration
+entity_count: 16
+relationship_count: 18
+observations:
+- >-
+  There are two parallel file worlds: the dataset-scoped documents under /datasets/{id}/documents and
+  the tenant-scoped file tree under /files, joined only by link-to-datasets. An agent must know which
+  world it is in — the same physical upload can exist as both a File and a Document.
+- >-
+  The retrieval path (POST /api/v1/retrieval) crosses dataset boundaries by taking dataset_ids[] and
+  document_ids[] arrays, so it is the one operation that is not scoped by a parent path.
+- >-
+  Ids carry no type prefix, which is the single largest agent-safety gap in this model: a wrong id
+  produces a generic code 102 rather than a typed error.

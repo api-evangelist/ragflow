@@ -1,0 +1,160 @@
+generated: '2026-08-27'
+method: searched
+source: https://ragflow.io/docs/http_api_reference + live 401/404 responses from https://cloud.ragflow.io
+format: proprietary-envelope
+rfc9457: false
+note: >-
+  RAGFlow does not use RFC 9457 problem+json. Every response — success and failure — is wrapped in one
+  proprietary envelope, and the HTTP status is frequently 200 even on failure: the application code in
+  the body is the authoritative signal. Two distinct code spaces are in play and the docs mix them: a
+  small application code space (0, 100-109) used by the /api/v1 handlers, and HTTP-status-shaped codes
+  (400/404/409/500 and the documented 401/403) echoed into the same `code` field by the framework layer.
+  Codes 1001/1002 come from the reference's own ERROR CODES table. An agent must read `code` and treat
+  `code: 0` as the only success value.
+envelope:
+  success:
+    shape: '{"code": 0, "data": <object|array|null>, "message": "..."}'
+    success_code: 0
+  failure:
+    shape: '{"code": <int>, "data": null, "message": "<human-readable string>"}'
+    alternate_shape: '{"code": <int>, "data": null, "error": "<string>", "message": "<string>"}'
+    note: >-
+      The `error` key appears on framework-level 404s observed live; handler-level failures omit it.
+  fields:
+  - name: code
+    type: integer
+    required: true
+    description: 0 on success; non-zero application or HTTP-shaped code on failure.
+  - name: data
+    type: object|array|null
+    required: true
+  - name: message
+    type: string
+    required: true
+  - name: error
+    type: string
+    required: false
+error_codes:
+- code: 0
+  title: Success
+  http_status: 200
+  meaning: The operation succeeded. `data` carries the payload.
+  action: Proceed.
+  occurrences_in_reference: 14
+- code: 100
+  title: Not found (application)
+  meaning: The addressed sub-resource does not exist.
+  example_message: Chunk not found
+  action: Re-resolve the id; do not retry with the same id.
+- code: 101
+  title: Invalid or missing argument
+  meaning: >-
+    A required field is absent or fails validation. Messages carry a structured
+    "Field: <name> - Message: <constraint> - Value: <value>" form for schema violations.
+  example_messages:
+  - 'No file part!'
+  - 'Field: <name> - Message: <String should have at least 1 character> - Value: <>'
+  - Memory name cannot be empty or whitespace.
+  - 'required argument are missing: message'
+  action: Fix the request body; retrying unchanged will fail identically.
+  occurrences_in_reference: 5
+- code: 102
+  title: Operation rejected / resource does not exist
+  meaning: >-
+    The dominant failure code across the API (56 documented occurrences). It covers a wide range of
+    semantic rejections — missing datasets, sessions, agents or models; malformed ids; immutable
+    fields; unmet preconditions — and is NOT distinguishable by code alone. The `message` string is
+    the only discriminator.
+  example_messages:
+  - The dataset doesn't exist
+  - Invalid Dataset ID
+  - The session doesn't exist
+  - Agent not found.
+  - '`document_ids` is required'
+  - The last content of this conversation is not from user.
+  - Can't change tenant_id.
+  - No default TTS model is set
+  action: >-
+    Parse `message`. Treat as non-retryable without a change to the request or to server-side
+    configuration.
+  occurrences_in_reference: 56
+- code: 103
+  title: Not the owner
+  meaning: The caller is authenticated but is not the owner of the object being operated on.
+  example_message: Only owner of canvas authorized for this operation.
+  action: Operate as the owning account.
+- code: 108
+  title: Insufficient dataset permission
+  meaning: The tenant lacks permission on one or more of the requested datasets.
+  example_message: "User '<tenant_id>' lacks permission for datasets"
+  action: Grant access to the named datasets, or drop them from the request.
+- code: 109
+  title: No authorization
+  meaning: Authorization header missing or the API key is not accepted by the handler.
+  example_message: no authorization
+  action: 'Supply a valid `Authorization: Bearer <API_KEY>` header.'
+- code: 400
+  title: Bad Request
+  http_status: 400
+  meaning: Invalid request parameters (documented in the reference's ERROR CODES table).
+  example_messages:
+  - 'No file part!'
+  - 'Provide either multipart file(s) or ?url=...!'
+  - The extension of file can't be changed
+  action: Correct the request.
+- code: 401
+  title: Unauthorized
+  http_status: 401
+  meaning: Unauthorized access.
+  observed_body: '{"code":401,"data":null,"message":"<Unauthorized ''401: Unauthorized''>"}'
+  observed_at: https://cloud.ragflow.io/api/v1/datasets
+  action: Supply or refresh the API key.
+- code: 403
+  title: Forbidden
+  http_status: 403
+  meaning: Access denied.
+  action: The key is valid but not entitled to this resource.
+- code: 404
+  title: Not Found
+  http_status: 404
+  meaning: Resource not found.
+  observed_body: '{"code":404,"data":null,"error":"Not Found","message":"Not Found..."}'
+  observed_at: https://cloud.ragflow.io/v1/openapi.json
+  example_messages:
+  - "Can't find this dataset!"
+  - document not found
+  - File or Folder not found!
+  - Parent folder not found!
+  action: Re-resolve the id or path.
+- code: 409
+  title: Conflict
+  http_status: 409
+  meaning: A uniqueness constraint was violated.
+  example_message: Duplicated folder name in the same folder.
+  action: Choose a different name, or reuse the existing object.
+- code: 500
+  title: Internal Server Error
+  http_status: 500
+  meaning: Server internal error.
+  action: >-
+    The only class in this catalog that is safely retryable. No Retry-After header is returned, so back
+    off on the client side.
+- code: 1001
+  title: Invalid Chunk ID
+  meaning: Invalid Chunk ID (from the reference's ERROR CODES table).
+  action: Re-resolve the chunk id via List chunks.
+- code: 1002
+  title: Chunk Update Failed
+  meaning: Chunk update failed (from the reference's ERROR CODES table).
+  action: Re-read the chunk and retry the update.
+error_code_count: 15
+gaps:
+- >-
+  No error is machine-classifiable beyond its code: code 102 alone covers 56 documented failure
+  messages spanning not-found, validation, precondition and configuration errors.
+- >-
+  No `type` URI, no `Retry-After`, and no distinction between retryable and terminal failures anywhere
+  in the envelope.
+- >-
+  HTTP status and `code` disagree by design on handler-level failures, so status-code-driven agent
+  error handling will misread RAGFlow responses.

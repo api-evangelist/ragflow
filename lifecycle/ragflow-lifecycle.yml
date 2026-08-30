@@ -1,0 +1,134 @@
+generated: '2026-08-27'
+method: searched
+source: https://ragflow.io/docs/http_api_reference + https://ragflow.io/docs/release_notes + https://github.com/infiniflow/ragflow/releases
+api: ragflow-http-api
+versioning:
+  scheme: uri-path
+  current_path_version: v1
+  product_version: 0.27.0
+  product_released: '2026-08-19'
+  product_scheme: semver-zero
+  note: >-
+    Two versions are in play and only one of them moves. The URI path has been /api/v1 throughout, while
+    the product has run from 0.18 to 0.27 with breaking behaviour changes in between. Because RAGFlow is
+    predominantly self-hosted, the contract an integrator faces is set by the Docker image the operator
+    deployed, not by the path version. RAGFlow Cloud tracks the current release. There is no version
+    header, no Accept-version negotiation and no per-tenant version pinning on Cloud.
+  capability_probe: GET /api/v1/system/healthz (unauthenticated; returns db / doc_engine / redis /
+    storage / status)
+deprecation:
+  policy_published: true
+  policy_form: >-
+    A "Deprecated API Aliases" table at the head of the HTTP API reference, plus inline DEPRECATED
+    admonitions on each affected operation. The reference states the v0.24.0 paths "remain available
+    through the backward compatibility layer, but new integrations should use the replacement
+    endpoints."
+  compatibility_layer: true
+  sunset_date_published: false
+  rfc8594_headers: false
+  headers_note: >-
+    No Deprecation or Sunset response header is documented or observed. A client calling a deprecated
+    alias gets no runtime signal at all — the deprecation exists only in prose.
+  docs: https://ragflow.io/docs/http_api_reference
+  deprecated_operations:
+  - deprecated: POST /api/v1/chats_openai/{chat_id}/chat/completions
+    replacement: POST /api/v1/openai/{chat_id}/chat/completions
+  - deprecated: PUT /api/v1/chats/{chat_id}/sessions/{session_id}
+    replacement: PATCH /api/v1/chats/{chat_id}/sessions/{session_id}
+  - deprecated: POST /api/v1/chats/{chat_id}/completions
+    replacement: POST /api/v1/chat/completions
+  - deprecated: POST /api/v1/sessions/related_questions
+    replacement: POST /api/v1/chat/recommendation
+  - deprecated: PUT /api/v1/datasets/{dataset_id}/documents/{document_id}/chunks/{chunk_id}
+    replacement: PATCH /api/v1/datasets/{dataset_id}/documents/{document_id}/chunks/{chunk_id}
+  - deprecated: GET /v1/system/healthz
+    replacement: GET /api/v1/system/healthz
+  - deprecated: POST /v1/document/upload_info
+    replacement: POST /api/v1/documents/upload
+  - deprecated: POST /api/v1/file/upload
+    replacement: POST /api/v1/files
+  - deprecated: POST /api/v1/file/create
+    replacement: POST /api/v1/files
+  - deprecated: GET /api/v1/file/list
+    replacement: GET /api/v1/files
+  - deprecated: GET /api/v1/file/root_folder
+    replacement: GET /api/v1/files
+  - deprecated: GET /api/v1/file/parent_folder
+    replacement: GET /api/v1/files/{file_id}/parent
+  - deprecated: GET /api/v1/file/all_parent_folder
+    replacement: GET /api/v1/files/{file_id}/ancestors
+  - deprecated: POST /api/v1/file/rm
+    replacement: DELETE /api/v1/files
+  - deprecated: POST /api/v1/file/rename
+    replacement: POST /api/v1/files/move
+  - deprecated: GET /api/v1/file/get/{file_id}
+    replacement: GET /api/v1/files/{file_id}
+  - deprecated: POST /api/v1/file/mv
+    replacement: POST /api/v1/files/move
+  - deprecated: POST /api/v1/file/convert
+    replacement: POST /api/v1/files/link-to-datasets
+  deprecated_parameters:
+  - parameter: top_k (Retrieve chunks)
+    replacement: knn_top_k
+    note: knn_top_k takes precedence when both are supplied.
+  - parameter: chat_id in the Delete chat assistants request body
+    replacement: ids list
+  deprecated_features:
+  - feature: GraphRAG
+    replacement: Graph, inside Knowledge Compilation (v0.27.0)
+    note: Removed from the UI; previously generated content remains searchable. The
+      /run_graphrag and /trace_graphrag endpoints are still documented.
+  - feature: RAPTOR
+    replacement: Tree, inside Knowledge Compilation (v0.27.0)
+    note: Removed from the UI; previously generated content remains searchable. The
+      /run_raptor and /trace_raptor endpoints are still documented.
+  deprecated_operation_count: 18
+status_page:
+  published: false
+  probed:
+  - url: https://status.ragflow.io/
+    status: '000'
+    note: DNS does not resolve.
+  - url: https://ragflow.statuspage.io/
+    status: 200
+    note: Atlassian Statuspage marketing site, not a RAGFlow status page.
+  - url: https://ragflow.instatus.com/
+    status: 200
+    note: Instatus marketing site, not a RAGFlow status page.
+  health_endpoint: https://cloud.ragflow.io/api/v1/system/healthz
+  health_note: >-
+    RAGFlow publishes no status page for RAGFlow Cloud. The unauthenticated healthz endpoint is the only
+    availability signal an integrator has, and it reports component state (db, doc_engine, redis,
+    storage) for the instance it is called on rather than a service history.
+sla:
+  published: false
+  note: >-
+    The pricing page lists "Custom SLA" as an Enterprise-tier feature. No SLA document, uptime target or
+    credit schedule is published for Free, Starter or Pro.
+support:
+  channels:
+  - type: Discord
+    url: https://discord.gg/NjYzJD3GM3
+  - type: GitHub Issues
+    url: https://github.com/infiniflow/ragflow/issues
+  - type: Contact form
+    url: https://ragflow.io/contact-us
+  enterprise: Dedicated support (Enterprise tier)
+release_cadence:
+  recent_releases:
+  - version: v0.27.0
+    date: '2026-08-19'
+  - version: v0.26.4
+    date: '2026-07-07'
+  - version: v0.26.3
+    date: '2026-07-02'
+  - version: v0.26.2
+    date: '2026-06-29'
+  - version: v0.26.1
+    date: '2026-06-17'
+  - version: v0.26.0
+    date: '2026-06-11'
+  observation: >-
+    Roughly monthly minors with patch releases in between; the Python SDK is published to PyPI on the
+    same day as the server release it matches.
+  source: https://api.github.com/repos/infiniflow/ragflow/releases

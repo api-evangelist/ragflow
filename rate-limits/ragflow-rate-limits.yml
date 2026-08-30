@@ -1,0 +1,80 @@
+generated: '2026-08-27'
+method: searched
+source: https://ragflow.io/docs/http_api_reference + https://ragflow.io/#pricing-plan + live header probes of https://cloud.ragflow.io
+api: ragflow-http-api
+summary: >-
+  RAGFlow publishes no request-rate limits and emits no rate-limit response headers. What it does
+  publish is a monthly CREDIT allowance per RAGFlow Cloud tier — a usage quota, not a rate limit. Both
+  facts are recorded below; the quota entries are marked kind: quota so they are not mistaken for
+  runtime throttling signals.
+limit_count: 3
+request_rate_limits:
+  documented: false
+  count: 0
+  note: >-
+    The 238KB HTTP API reference contains no mention of rate limiting, throttling, 429 or Retry-After.
+    The only occurrence of "rate-limited" in the whole document refers to a third-party You.com web
+    search endpoint, not to RAGFlow itself.
+response_headers:
+  rate_limit_headers: []
+  retry_after: false
+  status_on_exhaustion: null
+  probed:
+  - url: https://cloud.ragflow.io/api/v1/system/healthz
+    http_status: 200
+    headers_returned: [server, date, content-type, content-length, vary, via]
+    rate_limit_headers_present: false
+  - url: https://cloud.ragflow.io/api/v1/datasets?page=1&page_size=1
+    http_status: 401
+    headers_returned: [server, date, content-type, content-length, vary, via]
+    rate_limit_headers_present: false
+  note: >-
+    Neither X-RateLimit-*, RateLimit-* (RFC 9331 style) nor Retry-After appears on live responses. An
+    agent has no runtime signal of remaining budget from this API at all.
+limits:
+- scope: per-account
+  kind: quota
+  plan: Free
+  window: month
+  limit: 500
+  unit: credits
+  burst: null
+  source: https://ragflow.io/#pricing-plan
+- scope: per-account
+  kind: quota
+  plan: Starter
+  window: month
+  limit: 5000
+  unit: credits
+  burst: null
+  source: https://ragflow.io/#pricing-plan
+- scope: per-account
+  kind: quota
+  plan: Pro
+  window: month
+  limit: 20000
+  unit: credits
+  burst: null
+  source: https://ragflow.io/#pricing-plan
+other_published_ceilings:
+- name: dataset storage
+  values: {Free: 0.1 GB, Starter: 5 GB, Pro: 50 GB}
+  source: https://ragflow.io/#pricing-plan
+- name: page_size (Retrieve chunks / list endpoints)
+  value: 'top_k maximum 1024 on retrieval; MCP ragflow_list_datasets caps page_size at 1000, retrieval
+    at 100'
+  source: mcp/server/server.py
+- name: dataset document count
+  value: '>10,000 documents was a known CRUD failure mode until pagination was added to
+    get_flatted_meta_by_kbs() in v0.26.2'
+  source: https://ragflow.io/docs/release_notes
+self_hosted:
+  note: >-
+    A self-hosted RAGFlow deployment has no credits and no vendor-imposed limits. Its ceilings are the
+    operator's own hardware, the configured document engine and the rate limits of whichever model
+    providers are wired in.
+gaps:
+- No request-rate limit is published for RAGFlow Cloud, so an integrator cannot size a client.
+- No rate-limit or quota headers are returned, so an agent cannot back off before being cut off.
+- Credit consumption per operation is undefined, so the 500/5,000/20,000 figures are not convertible
+  into a number of API calls.

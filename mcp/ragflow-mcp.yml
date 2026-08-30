@@ -1,0 +1,147 @@
+generated: '2026-08-27'
+method: searched
+source: https://github.com/infiniflow/ragflow/blob/main/mcp/server/server.py + https://ragflow.io/docs/launch_mcp_server + https://ragflow.io/docs/mcp_tools
+name: RAGFlow MCP Server
+status: published
+vendor: InfiniFlow Inc.
+license: Apache-2.0
+description: >-
+  A first-party Model Context Protocol server that InfiniFlow ships inside the RAGFlow repository at
+  mcp/server/server.py. It is an OPTIONAL, DISABLED-BY-DEFAULT component of a RAGFlow deployment: the
+  operator uncomments services.ragflow.command in docker/docker-compose.yml (or runs
+  `uv run mcp/server/server.py`) to start it alongside a working RAGFlow server. There is no
+  InfiniFlow-hosted MCP endpoint — cloud.ragflow.io/mcp answers HTTP 405 from openresty, confirming no
+  MCP surface is exposed on RAGFlow Cloud.
+deployment:
+  mode: local-stdio
+  endpoint: null
+  install: >-
+    uv run mcp/server/server.py --host=127.0.0.1 --port=9382 --base-url=http://127.0.0.1:9380
+    --api-key=<RAGFLOW_API_KEY>
+  install_docker: >-
+    docker compose -f docker-compose.yml up, after uncommenting services.ragflow.command with
+    --enable-mcpserver --mcp-host=0.0.0.0 --mcp-port=9382 --mcp-base-url=http://127.0.0.1:9380
+    --mcp-script-path=/ragflow/mcp/server/server.py --mcp-mode=self-host
+  package: https://github.com/infiniflow/ragflow/tree/main/mcp/server
+  auth: api-key
+  verified: searched
+  note: >-
+    RECORDED AS local-stdio BECAUSE A HUMAN MUST DEPLOY IT FIRST — but the transport is not stdio. Once
+    running, this server speaks MCP over HTTP: a streamable-HTTP transport at /mcp (GET/POST/DELETE,
+    JSON responses on by default) and the legacy SSE transport at /sse with POSTs to /messages/. Both
+    are enabled by default and each can be disabled with --no-transport-streamable-http-enabled /
+    --no-transport-sse-enabled. The endpoint therefore only ever exists at an address the operator
+    chooses (default 127.0.0.1:9382), never at a vendor URL, which is why `endpoint` is null.
+modes:
+- name: self-host
+  default: true
+  description: >-
+    The MCP server holds one RAGFlow API key and can reach only that tenant's datasets. The key is
+    supplied at launch via --api-key / --mcp-host-api-key.
+- name: host
+  default: false
+  description: >-
+    Each MCP client supplies its own RAGFlow API key on every request, so each client reaches its own
+    datasets. Streamable-HTTP is not yet supported in host mode; --no-transport-streamable-http-enabled
+    must be set.
+requirements:
+- RAGFlow server v0.18.0 or later, running and reachable at --base-url
+- A RAGFlow API key (see https://ragflow.io/docs/acquire_ragflow_api_key)
+tools:
+- name: ragflow_retrieval
+  description: >-
+    Retrieve relevant chunks from the RAGFlow retrieve interface based on a question. dataset_ids may be
+    omitted or empty to search across all available datasets; document_ids narrows to specific documents.
+    The tool description is generated at runtime and embeds the id + description of every dataset the
+    calling key can see.
+  input_schema:
+    type: object
+    required:
+    - question
+    properties:
+      question:
+        type: string
+      dataset_ids:
+        type: array
+        items: {type: string}
+      document_ids:
+        type: array
+        items: {type: string}
+      page:
+        type: integer
+        default: 1
+        minimum: 1
+      page_size:
+        type: integer
+        default: 10
+        minimum: 1
+        maximum: 100
+      similarity_threshold:
+        type: number
+        default: 0.2
+        minimum: 0.0
+        maximum: 1.0
+      vector_similarity_weight:
+        type: number
+        default: 0.3
+        minimum: 0.0
+        maximum: 1.0
+      keyword:
+        type: boolean
+        default: false
+      top_k:
+        type: integer
+        default: 1024
+        minimum: 1
+        maximum: 1024
+      rerank_id:
+        type: string
+      force_refresh:
+        type: boolean
+        default: false
+- name: ragflow_list_datasets
+  description: >-
+    List all accessible datasets (knowledge bases), returning dataset ids, names and descriptions, so a
+    client can discover what to retrieve from.
+  input_schema:
+    type: object
+    properties:
+      page:
+        type: integer
+        default: 1
+        minimum: 1
+      page_size:
+        type: integer
+        default: 100
+        minimum: 1
+        maximum: 1000
+- name: ragflow_list_chats
+  description: >-
+    List all accessible chat assistants, returning ids, names and descriptions, so a client can discover
+    which assistants are available for conversation.
+  input_schema:
+    type: object
+    properties:
+      page:
+        type: integer
+        default: 1
+        minimum: 1
+      page_size:
+        type: integer
+        default: 30
+        minimum: 1
+        maximum: 100
+tool_count: 3
+docs_note: >-
+  https://ragflow.io/docs/mcp_tools still documents only a single `retrieve` tool. The shipped server
+  source exposes three tools named ragflow_retrieval, ragflow_list_datasets and ragflow_list_chats — the
+  published docs page is behind the code. Schemas above are read verbatim from server.py, not from the
+  docs.
+x-evidence:
+- url: https://cloud.ragflow.io/mcp
+  method: POST tools/list
+  http_status: 405
+  note: openresty "405 Not Allowed" — RAGFlow Cloud exposes no MCP endpoint.
+- url: https://raw.githubusercontent.com/infiniflow/ragflow/main/mcp/server/server.py
+  http_status: 200
+  note: 38,665 bytes; tool definitions read at lines 542-649.
