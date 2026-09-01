@@ -1,0 +1,64 @@
+generated: '2026-08-27'
+method: searched
+source: https://ragflow.io/#pricing-plan + https://github.com/infiniflow/ragflow + https://ragflow.io/docs/http_api_reference
+summary: >-
+  RAGFlow publishes no test mode, no test keys, no fixtures and no sandbox API. What it offers instead is
+  two evaluation paths, and the important finding is that only one of them can reach the API.
+environments:
+- name: RAGFlow Cloud — Free plan
+  url: https://cloud.ragflow.io/
+  kind: console
+  signup: self-serve
+  cost: 0
+  api_access: false
+  api_note: >-
+    The pricing page states "API key not available" on Free. The Free plan is a product console, NOT an
+    API sandbox: an integrator can build 5 apps and load 0.1 GB of documents in the UI but cannot make a
+    single authenticated HTTP API call without upgrading to Starter.
+  limits:
+    apps: 5
+    team_members: 1
+    dataset_storage_gb: 0.1
+    credits_per_month: 500
+- name: Self-hosted deployment
+  kind: full-environment
+  cost: 0
+  license: Apache-2.0
+  api_access: true
+  install: docker compose -f docker/docker-compose.yml up -d
+  image: https://hub.docker.com/r/infiniflow/ragflow
+  source: https://github.com/infiniflow/ragflow
+  note: >-
+    This is the de-facto sandbox for the RAGFlow API. A local deployment issues real API keys, exposes
+    the full /api/v1 surface at http://{address}/api/v1, and can also run the optional MCP server. It is
+    a production environment, not a test mode — there is no separation between test and live data, no
+    test-mode key prefix, and no way to mark a call as non-billable.
+test_mode:
+  supported: false
+  key_prefixes:
+    live: 'ragflow-'
+    test: null
+  note: >-
+    RAGFlow keys carry a single `ragflow-` prefix in the documented launch examples. There is no
+    test/live distinction, so an agent cannot tell from a key whether it is pointed at real data.
+test_data:
+  test_cards: []
+  test_identifiers: []
+  fixtures: []
+  note: >-
+    None published. No magic identifiers, no seeded datasets, no downloadable sample corpus is offered
+    as part of the product.
+time_simulation:
+  supported: false
+triggers:
+  supported: false
+health_check:
+  url: https://cloud.ragflow.io/api/v1/system/healthz
+  authenticated: false
+  observed_status: 200
+  observed_body: '{"db":"ok","doc_engine":"ok","redis":"ok","status":"ok","storage":"ok"}'
+  note: The one endpoint anyone can call without a key, on Cloud or on a self-hosted instance.
+gaps:
+- No API sandbox and no test mode of any kind.
+- The only zero-cost API access requires the integrator to stand up Docker infrastructure first.
+- No separation of test and live data, so every agent rehearsal writes to a real dataset.

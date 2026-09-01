@@ -1,0 +1,89 @@
+generated: '2026-08-27'
+method: searched
+source: https://ragflow.io/docs/release_notes
+alternate_source: https://ragflow.io/changelog
+repo_releases: https://github.com/infiniflow/ragflow/releases
+scheme: semver-zero
+current_version: 0.27.0
+current_released: '2026-08-19'
+cadence: >-
+  Roughly monthly minor releases with patch releases in between. Each entry is dated, grouped by New
+  features / Improvements / Model Support / Infrastructure / Tools / UI-UX / i18n / Bug fixes, and links
+  every line item to the merged pull request. API-affecting changes are called out explicitly and
+  cross-linked into the HTTP API reference.
+window: recent — v0.26.0 (2026-06-11) through v0.27.0 (2026-08-19)
+entries:
+- version: 0.27.0
+  date: '2026-08-19'
+  breaking: true
+  breaking_notes:
+  - >-
+    GraphRAG and RAPTOR are deprecated and removed from the UI, replaced by Graph and Tree inside the
+    new Knowledge Compilation feature. Previously generated content remains searchable, and the
+    /run_graphrag, /trace_graphrag, /run_raptor and /trace_raptor endpoints are still documented.
+  additions:
+  - >-
+    Document-level and dataset-level Knowledge Compilation supporting Wiki, Graph, Tree, Page Index,
+    Mind Map, Timeline and To Skills.
+  - Agentic RAG with four thinking modes when answering — Low, Medium, High and Ultra.
+  - >-
+    Model support — Qwen 3.8 series, Kimi K3, AIMLAPI, GreenPT, AWS Bedrock Reranker, OpenRouter
+    Embedding, FunASR/SenseVoice STT, Mistral OCR document parser.
+  - Infrastructure — GaussDB database adapter, SereneDB document storage engine, Tenki sandbox
+    provider, Infinity integration upgraded to 0.7.3.
+  highlights:
+  - Fully revamped model provider system.
+  - New Querit web search tool.
+  - Fixed server hang when parsing large files and document upload hanging the whole service.
+- version: 0.26.4
+  date: '2026-07-07'
+  breaking: false
+  additions:
+  - Language-aware Snowball stemmer covering 16 languages, wired into the tokenization pipeline via the
+    dataset `language` parameter.
+  highlights:
+  - >-
+    Fixed the MCP server crashing because list_chats expected a list from the /chats API but received a
+    paginated dictionary.
+  - Fixed the Docling parser silently dropping mathematical formulas.
+  - Fixed bulk file-to-dataset linking removing existing links.
+- version: 0.26.3
+  date: '2026-07-02'
+  breaking: false
+  additions:
+  - 'API — the Ingest documents endpoint (POST /api/v1/documents/ingest) for processing documents
+    through a customized pipeline.'
+  - 'MCP — two new tools, ragflow_list_datasets and ragflow_list_chats, added to the RAGFlow MCP server.'
+  - Google BigQuery data source connector for document ingestion and incremental syncing.
+  - Layout-aware SoMark OCR parser for tables and figures.
+  highlights:
+  - Partial-success handling for batch document uploads, so one failed file no longer discards the batch.
+- version: 0.26.2
+  date: '2026-06-29'
+  breaking: false
+  additions:
+  - Chat channels — WhatsApp (QR scan), DingTalk (bot API credentials) and WeCom (WebSocket).
+  - PP-OCRv6 fallback logic and image parsing inside the PaddleOCR pipeline.
+  highlights:
+  - Pagination added to get_flatted_meta_by_kbs() to stop CRUD failures on datasets over 10,000
+    documents.
+- version: 0.26.1
+  date: '2026-06-17'
+  breaking: false
+  additions:
+  - Chat channels — deploy RAGFlow assistants as chatbots in Discord and Feishu.
+  - Observability — multi-turn chat traces grouped by session in Langfuse.
+  highlights:
+  - >-
+    API — a legacy mode on /chat/completions restoring the v0.23.0 style <think> output for backward
+    compatibility.
+- version: 0.26.0
+  date: '2026-06-11'
+  breaking: false
+  additions:
+  - >-
+    Data source connectors for Outlook, OneDrive, Microsoft Teams, Slack, SharePoint, Salesforce and
+    Azure Blob Storage.
+  - Auto-populated model lists and multiple API keys per model provider.
+  - Checkpoint-and-resume for community extraction and entity resolution.
+entry_count: 6

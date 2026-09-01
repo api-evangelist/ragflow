@@ -1,0 +1,61 @@
+generated: '2026-08-27'
+method: searched
+source: https://pypi.org/pypi/ragflow-sdk/json + https://hub.docker.com/r/infiniflow/ragflow + https://github.com/infiniflow/ragflow
+note: >-
+  RAGFlow ships exactly one first-party client library — the Python SDK, published to PyPI as
+  ragflow-sdk and versioned in lockstep with the server (0.27.0 on PyPI, released the same day as the
+  v0.27.0 server release, so the SDK is current with the API it wraps). No JavaScript/TypeScript, Java,
+  Go, Ruby, PHP or Rust client is published by InfiniFlow: registry.npmjs.org returns 404 for `ragflow`,
+  `ragflow-sdk` and `@infiniflow/ragflow`. The server itself is distributed as a Docker image rather
+  than a language package.
+packages:
+- name: ragflow-sdk
+  registry: pypi
+  url: https://pypi.org/project/ragflow-sdk/
+  language: python
+  official: true
+  kind: sdk
+  version: 0.27.0
+  published: '2026-08-19'
+  license: Apache-2.0
+  requires_python: '>=3.13,<3.14'
+  release_count: 37
+  source: https://github.com/infiniflow/ragflow/tree/main/sdk/python
+  summary: >-
+    First-party Python client for the RAGFlow HTTP API. Modules cover datasets, documents, chunks,
+    chat assistants, sessions, agents and memory.
+  docs: https://ragflow.io/docs/python_api_reference
+  recent_versions:
+  - version: 0.26.4
+    published: '2026-07-07'
+  - version: 0.26.3
+    published: '2026-07-02'
+  - version: 0.26.2
+    published: '2026-06-29'
+  - version: 0.26.1
+    published: '2026-06-17'
+  - version: 0.26.0
+    published: '2026-06-11'
+- name: infiniflow/ragflow
+  registry: dockerhub
+  url: https://hub.docker.com/r/infiniflow/ragflow
+  language: n/a
+  official: true
+  kind: server-image
+  version: null
+  published: '2026-08-26'
+  note: >-
+    Distribution image for the RAGFlow server itself, not a client library. Docker Hub reports
+    3,687,719 pulls and a last-updated date of 2026-08-26. `version: null` because the repository
+    carries floating tags (`latest`, `nightly`, `v0.27.0`, slim/full variants) rather than one
+    canonical published version; docker-compose in the repo pins RAGFLOW_IMAGE per release.
+absent:
+- registry: npm
+  probed:
+  - name: ragflow
+    status: 404
+  - name: ragflow-sdk
+    status: 404
+  - name: '@infiniflow/ragflow'
+    status: 404
+  note: No first-party JavaScript/TypeScript client is published.

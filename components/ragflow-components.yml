@@ -1,0 +1,45 @@
+generated: '2026-08-27'
+method: searched
+source: https://ragflow.io/docs/embed_into_web_pages + https://ragflow.io/docs/chat_channels_overview
+note: >-
+  RAGFlow ships no client-side component LIBRARY — there is no web-component package, no element SDK and
+  no npm loader. What it does ship is an embeddable hosted surface (an iframe of a published agent or
+  chat assistant) generated from the RAGFlow UI, plus a set of managed chat-channel connectors that put
+  the same assistant inside third-party messaging platforms. Both are recorded below because they are
+  the real client-side integration paths, but neither is a downloadable component.
+families:
+- name: Embedded agent / chat iframe
+  kind: hosted-embed
+  loader: null
+  package: null
+  docs: https://ragflow.io/docs/embed_into_web_pages
+  how: >-
+    Open the agent in the canvas, choose Manage -> Embed Webpage, and copy the generated iframe snippet
+    into a third-party page.
+  requires: A RAGFlow API key.
+  constraints:
+  - Only Workflow agents can be embedded. Ingestion-pipeline and Compilation-Operator agents cannot.
+  note: >-
+    The snippet is generated per agent inside the product, so there is no public, documented iframe URL
+    template to record here — nothing is asserted about its shape.
+- name: Chat channels
+  kind: managed-connector
+  loader: null
+  package: null
+  docs: https://ragflow.io/docs/chat_channels_overview
+  how: >-
+    Bind a RAGFlow chat assistant to an external messaging platform from the Chat Channels page. The
+    conversation surface is the third-party client, not a RAGFlow component.
+  platforms:
+  - WhatsApp (QR code scan, v0.26.2)
+  - DingTalk (bot API credentials, v0.26.2)
+  - WeCom (WebSocket, v0.26.2)
+  - Discord (v0.26.1)
+  - Feishu (v0.26.1)
+  note: Conversation histories persist across restarts and separate when a channel is rebound.
+component_libraries: []
+npm_packages: []
+cdn_distributions: []
+gaps:
+- No embeddable JavaScript widget, web component or React component is published to npm or a CDN.
+- The iframe embed is generated in-product, so it cannot be provisioned programmatically.

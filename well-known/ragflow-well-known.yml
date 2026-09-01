@@ -1,0 +1,103 @@
+generated: '2026-08-27'
+method: probed
+source: live GET probes of /.well-known/* on every RAGFlow host
+note: >-
+  Nothing is served. ragflow.io is a Docusaurus site that returns a hard 404 (with an HTML 404 page) for
+  every /.well-known/ path. cloud.ragflow.io and demo.ragflow.io are live RAGFlow application instances
+  whose single-page-app catch-all answers HTTP 200 with the same 4,501-byte React shell for EVERY
+  /.well-known/ path — including agent-card.json and agent.json — so those 200s are NOT documents and
+  are recorded as misses. Confirmed by contrast: the same hosts return a real JSON body on
+  /api/v1/system/healthz and a real JSON 404 envelope on /v1/openapi.json, so the API tier is reachable
+  and it genuinely serves none of these documents. No WellKnown or SecurityTxt pointer is emitted.
+hosts:
+- host: ragflow.io
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+  - path: /.well-known/openid-configuration
+    status: 404
+    file: null
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    file: null
+  - path: /.well-known/api-catalog
+    status: 404
+    file: null
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 404
+    file: null
+  - path: /.well-known/agent.json
+    status: 404
+    file: null
+- host: cloud.ragflow.io
+  documents:
+  - path: /.well-known/security.txt
+    status: 200
+    file: null
+    note: SPA HTML shell, not a document — treated as a miss.
+  - path: /.well-known/openid-configuration
+    status: 200
+    file: null
+    note: SPA HTML shell, not a document — treated as a miss.
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    file: null
+    note: SPA HTML shell, not a document — treated as a miss.
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    file: null
+    note: SPA HTML shell, not a document — treated as a miss.
+  - path: /.well-known/api-catalog
+    status: 200
+    file: null
+    note: SPA HTML shell, not a document — treated as a miss.
+  - path: /.well-known/ai-plugin.json
+    status: 200
+    file: null
+    note: SPA HTML shell, not a document — treated as a miss.
+  - path: /.well-known/agent-card.json
+    status: 200
+    file: null
+    note: SPA HTML shell, not an AgentCard — treated as a miss.
+  - path: /.well-known/agent.json
+    status: 200
+    file: null
+    note: SPA HTML shell, not an AgentCard — treated as a miss.
+- host: demo.ragflow.io
+  documents:
+  - path: /.well-known/security.txt
+    status: 200
+    file: null
+    note: SPA HTML shell, not a document — treated as a miss.
+  - path: /.well-known/openid-configuration
+    status: 200
+    file: null
+    note: SPA HTML shell, not a document — treated as a miss.
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    file: null
+    note: SPA HTML shell, not a document — treated as a miss.
+  - path: /.well-known/api-catalog
+    status: 200
+    file: null
+    note: SPA HTML shell, not a document — treated as a miss.
+  - path: /.well-known/ai-plugin.json
+    status: 200
+    file: null
+    note: SPA HTML shell, not a document — treated as a miss.
+  - path: /.well-known/agent-card.json
+    status: 200
+    file: null
+    note: SPA HTML shell, not an AgentCard — treated as a miss.
+  - path: /.well-known/agent.json
+    status: 200
+    file: null
+    note: SPA HTML shell, not an AgentCard — treated as a miss.
+summary:
+  documents_served: 0
+  hosts_probed: 3
+  paths_probed: 22

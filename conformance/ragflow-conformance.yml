@@ -1,0 +1,155 @@
+generated: '2026-08-27'
+method: searched
+source: https://ragflow.io/docs/http_api_reference + https://ragflow.io/policies/dpa + https://github.com/infiniflow/ragflow/blob/main/mcp/server/server.py
+note: >-
+  Assertions below are read from RAGFlow's own contract and published documents. Absence is recorded as
+  conforms:false with the evidence that establishes the absence — an honest negative, not a penalty.
+standards:
+- id: openapi
+  name: OpenAPI Specification
+  conforms: false
+  evidence: >-
+    No OpenAPI or Swagger document is published anywhere. Probed /openapi.json, /openapi.yaml,
+    /swagger.json, /v1/openapi.json, /api/v1/openapi.json, /api-docs, /apispec_1.json and /redoc on
+    cloud.ragflow.io and demo.ragflow.io: the SPA catch-all returns an HTML shell on some and the API
+    returns a real JSON 404 on the rest. The GitHub repository tree (6,618 paths) contains no file
+    matching openapi/swagger. The 95-operation reference at ragflow.io/docs/http_api_reference is
+    human-readable Markdown only.
+- id: asyncapi
+  name: AsyncAPI
+  conforms: false
+  evidence: >-
+    RAGFlow publishes no webhooks and no event catalog. The only asynchronous surfaces are SSE streams
+    on the chat-completions endpoints (a response streaming mode, not an event API) and the MCP server's
+    legacy SSE transport.
+- id: graphql
+  name: GraphQL
+  conforms: false
+  evidence: No /graphql surface exists on any RAGFlow host.
+- id: grpc
+  name: gRPC / Protobuf
+  conforms: false
+  evidence: No .proto file appears anywhere in the repository tree; no buf.build module is published.
+- id: soap-wsdl
+  name: SOAP / WSDL
+  conforms: false
+  evidence: Not applicable to this product category; no ?wsdl surface responds on any host.
+- id: rfc9457
+  name: RFC 9457 Problem Details for HTTP APIs
+  conforms: false
+  evidence: >-
+    Errors use a proprietary {"code","data","message"} envelope with no type URI and, on handler-level
+    failures, an HTTP 200 status. See errors/ragflow-error-codes.yml.
+- id: oauth2
+  name: OAuth 2.0
+  conforms: false
+  evidence: >-
+    Authentication is a static tenant API key carried as a bearer token. No authorization server, no
+    token endpoint, no scopes. /.well-known/oauth-authorization-server serves no document on any host.
+- id: oidc
+  name: OpenID Connect
+  conforms: false
+  evidence: /.well-known/openid-configuration serves no document on any RAGFlow host.
+- id: idempotency
+  name: Idempotency-Key (draft-ietf-httpapi-idempotency-key)
+  conforms: false
+  evidence: The 238KB HTTP API reference contains zero occurrences of "idempoten".
+- id: rfc8594
+  name: RFC 8594 Sunset header / Deprecation header
+  conforms: false
+  evidence: >-
+    RAGFlow maintains a genuine backward-compatibility layer and a documented 18-row deprecated-alias
+    table, but emits no Deprecation or Sunset response header. The deprecation exists in prose only.
+    See lifecycle/ragflow-lifecycle.yml.
+- id: rfc9331-ratelimit-headers
+  name: RateLimit header fields for HTTP
+  conforms: false
+  evidence: >-
+    No RateLimit-*, X-RateLimit-* or Retry-After header on live 200 or 401 responses from
+    cloud.ragflow.io.
+- id: rfc9116
+  name: RFC 9116 security.txt
+  conforms: false
+  evidence: 404 on ragflow.io; SPA HTML shell on cloud.ragflow.io and demo.ragflow.io.
+- id: pagination
+  name: Consistent pagination contract
+  conforms: true
+  evidence: >-
+    Every list endpoint takes page (default 1), page_size, orderby (create_time|update_time) and desc,
+    and responses carry a total. Page-number style, no cursors.
+- id: mcp
+  name: Model Context Protocol
+  conforms: true
+  version_note: >-
+    A first-party MCP server ships in the repository (mcp/server/server.py, Apache-2.0) exposing three
+    tools with real JSON Schema inputSchemas. It serves the streamable-HTTP transport at /mcp and the
+    legacy SSE transport at /sse (SSE introduced 2024-11-05, deprecated 2025-03-26 upstream; RAGFlow
+    still enables both by default). Self-hosted only — no vendor-hosted endpoint.
+  evidence: https://ragflow.io/docs/launch_mcp_server
+- id: agent-skills
+  name: Agent Skills (SKILL.md)
+  conforms: true
+  evidence: >-
+    InfiniFlow publishes a SKILL.md with frontmatter (name, description, metadata.openclaw.requires) at
+    https://github.com/infiniflow/ragflow-skills — saved verbatim in skills/.
+- id: a2a
+  name: A2A Agent Card
+  conforms: false
+  evidence: >-
+    /.well-known/agent-card.json and /.well-known/agent.json probed on ragflow.io (404),
+    cloud.ragflow.io and demo.ragflow.io (200 SPA HTML shell, not an AgentCard object). No card exists.
+- id: openai-chat-completions
+  name: OpenAI Chat Completions wire format
+  conforms: true
+  evidence: >-
+    POST /api/v1/openai/{chat_id}/chat/completions and POST /api/v1/agents_openai/{agent_id}/chat/
+    completions follow the OpenAI request/response format, including streamed
+    object:"chat.completion.chunk" deltas with choices[].delta.content, finish_reason, system_fingerprint
+    and usage. This is the de-facto interoperability standard for this market, and RAGFlow implements it
+    directly rather than through a bespoke shape — an agent already speaking OpenAI can converse with a
+    RAGFlow assistant with no connector.
+  domain_standard: true
+- id: gdpr
+  name: EU GDPR / UK GDPR / Swiss FADP
+  conforms: true
+  evidence: >-
+    A published Data Processing Agreement at https://ragflow.io/policies/dpa names the EU GDPR, UK GDPR
+    and Swiss Federal Act on Data Protection as Applicable Data Protection Laws and incorporates the
+    European Commission Standard Contractual Clauses (Module 2, Controller-to-Processor) for
+    cross-border transfers.
+- id: ccpa
+  name: California Consumer Privacy Act
+  conforms: true
+  evidence: Named as an Applicable Data Protection Law in the DPA at https://ragflow.io/policies/dpa.
+- id: sccs
+  name: EU Standard Contractual Clauses
+  conforms: true
+  evidence: >-
+    Module 2 (Controller-to-Processor) SCCs are incorporated by the DPA; the privacy policy also cites
+    SCCs or equivalent transfer mechanisms.
+certifications:
+  soc2: false
+  iso27001: false
+  pci_dss: false
+  hipaa: false
+  fedramp: false
+  note: >-
+    No security certification is claimed on ragflow.io, in the policies, or in the repository. No trust
+    center exists (trust.ragflow.io does not resolve).
+domain_standard_conformance:
+  market: retrieval-augmented generation / LLM context platforms
+  standard_found: true
+  standard: OpenAI Chat Completions wire format
+  where: >-
+    POST /api/v1/openai/{chat_id}/chat/completions and POST /api/v1/agents_openai/{agent_id}/chat/
+    completions, documented under "OpenAI-Compatible API" at the head of the HTTP API reference.
+  note: >-
+    This market has no formal standards body. The two things that function as standards in it are the
+    OpenAI chat-completions wire format and the Model Context Protocol, and RAGFlow implements both from
+    its own contract — not as a claim on a marketing page. Recorded as a reward, with no penalty implied
+    for the absence of a formal domain standard.
+  secondary: Model Context Protocol (mcp/server/server.py)
+summary:
+  asserted: 20
+  conforming: 8
+  non_conforming: 12

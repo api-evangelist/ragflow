@@ -1,0 +1,136 @@
+generated: '2026-08-27'
+method: derived
+source: mcp/ragflow-mcp.yml + https://ragflow.io/docs/http_api_reference
+note: >-
+  RAGFlow publishes NO OpenAPI, so there are no operationIds to bind to. Each crosswalk row therefore
+  names the REST method + path exactly as the HTTP API reference documents it, and the binding was
+  confirmed against mcp/server/server.py, whose RAGFlowConnector calls those same endpoints. Confidence
+  is high for all three rows because the mapping was read from the server's own source, not inferred
+  from tool names.
+surfaces:
+  openapi: null
+  openapi_note: No machine-readable specification is published for the RAGFlow HTTP API.
+  rest_reference: https://ragflow.io/docs/http_api_reference
+  rest_base: https://cloud.ragflow.io/api/v1
+  graphql: null
+  mcp: null
+  mcp_note: >-
+    Self-hosted only; the endpoint is whatever address the operator binds (default 127.0.0.1:9382,
+    /mcp for streamable-HTTP and /sse for legacy SSE). No vendor-hosted MCP URL exists.
+  gated:
+  - RAGFlow HTTP API requires a Bearer API key; every operation is authenticated.
+  - The MCP server requires a RAGFlow API key at launch (self-host mode) or per request (host mode).
+crosswalk:
+- tool: ragflow_retrieval
+  category: retrieval
+  rest:
+  - POST /api/v1/retrieval
+  binding: direct
+  confidence: high
+  note: >-
+    The tool's question/dataset_ids/document_ids/page/page_size/similarity_threshold/
+    vector_similarity_weight/keyword/top_k/rerank_id arguments are the same body parameters the
+    Retrieve chunks operation documents.
+- tool: ragflow_list_datasets
+  category: datasets
+  rest:
+  - GET /api/v1/datasets
+  binding: direct
+  confidence: high
+  note: page / page_size map straight onto the List datasets filter parameters.
+- tool: ragflow_list_chats
+  category: chat-assistants
+  rest:
+  - GET /api/v1/chats
+  binding: direct
+  confidence: high
+  note: page / page_size map straight onto the List chat assistants filter parameters.
+mcp_only: []
+rest_only:
+- area: DATASET MANAGEMENT
+  operations: 11
+  examples:
+  - POST /api/v1/datasets
+  - PUT /api/v1/datasets/{dataset_id}
+  - DELETE /api/v1/datasets
+  - GET /api/v1/datasets/{dataset_id}/knowledge_graph
+  - POST /api/v1/datasets/{dataset_id}/run_graphrag
+  - POST /api/v1/datasets/{dataset_id}/run_raptor
+  reason: No MCP tool wraps dataset creation, mutation, deletion or knowledge-graph construction.
+- area: FILE MANAGEMENT WITHIN DATASET
+  operations: 8
+  examples:
+  - POST /api/v1/datasets/{dataset_id}/documents
+  - PATCH /api/v1/datasets/{dataset_id}/documents/{document_id}
+  - POST /api/v1/datasets/{dataset_id}/chunks
+  - POST /api/v1/documents/ingest
+  reason: Document upload, parsing and ingestion are REST-only.
+- area: CHUNK MANAGEMENT WITHIN DATASET
+  operations: 9
+  examples:
+  - POST /api/v1/datasets/{dataset_id}/documents/{document_id}/chunks
+  - PATCH /api/v1/datasets/{dataset_id}/documents/{document_id}/chunks/{chunk_id}
+  - GET /api/v1/datasets/{dataset_id}/metadata/summary
+  reason: Only the retrieval read path is exposed to MCP; chunk writes are REST-only.
+- area: CHAT ASSISTANT MANAGEMENT
+  operations: 7
+  examples:
+  - POST /api/v1/chats
+  - PUT /api/v1/chats/{chat_id}
+  - DELETE /api/v1/chats
+  reason: ragflow_list_chats reads assistants; creating and mutating them is REST-only.
+- area: SESSION MANAGEMENT
+  operations: 16
+  examples:
+  - POST /api/v1/chat/completions
+  - POST /api/v1/agents/chat/completions
+  - POST /api/v1/chat/audio/speech
+  - POST /api/v1/chat/mindmap
+  reason: >-
+    Conversation itself is REST-only. An MCP client can find datasets and retrieve chunks, but cannot
+    converse with a RAGFlow chat assistant or agent through MCP.
+- area: AGENT MANAGEMENT
+  operations: 4
+  examples:
+  - GET /api/v1/agents
+  - POST /api/v1/agents
+  reason: No MCP tool covers agent CRUD.
+- area: MEMORY MANAGEMENT
+  operations: 12
+  examples:
+  - POST /api/v1/memories
+  - POST /api/v1/messages
+  - GET /api/v1/messages/search
+  reason: The whole memory/message surface is REST-only.
+- area: FILE MANAGEMENT
+  operations: 18
+  examples:
+  - POST /api/v1/files
+  - GET /api/v1/workspaces/{workspace_id}/commits
+  - GET /api/v1/workspaces/{workspace_id}/commits/diff
+  reason: Workspace files and the commit/version-history surface are REST-only.
+- area: SEARCH APP MANAGEMENT
+  operations: 6
+  examples:
+  - POST /api/v1/searches
+  - POST /api/v1/searches/{search_id}/completions
+  reason: Search apps are REST-only.
+- area: OpenAI-Compatible API
+  operations: 2
+  examples:
+  - POST /api/v1/openai/{chat_id}/chat/completions
+  - POST /api/v1/agents_openai/{agent_id}/chat/completions
+  reason: The OpenAI-compatible completions surface has no MCP equivalent.
+- area: System
+  operations: 1
+  examples:
+  - GET /api/v1/system/healthz
+  reason: Health check is REST-only.
+coverage:
+  rest_operations_documented: 95
+  mcp_tools: 3
+  tools_bound_to_rest: 3
+  tools_unbound: 0
+  rest_operations_reachable_via_mcp: 3
+  rest_operations_mcp_only_gap: 92
+  percent_rest_reachable_via_mcp: 3.2
