@@ -1,15 +1,14 @@
 aid: ragflow
 name: RAGFlow
-description: >-
-  RAGFlow is the open-source Retrieval-Augmented Generation engine built by InfiniFlow Inc. It combines
-  deep document understanding (DeepDoc parsing of PDFs, images, tables and scanned files) with hybrid
-  retrieval — dense vector search, BM25 full-text and tensor/multi-vector re-ranking — and an integrated
-  visual agent platform, to serve as a context layer for LLM applications. The platform ships as an
-  Apache-2.0 self-hosted Docker deployment and as RAGFlow Cloud, a hosted multi-tenant service. Its
-  RESTful HTTP API covers dataset (knowledge base) management, document ingestion and parsing, chunk
+description: RAGFlow is the open-source Retrieval-Augmented Generation engine built by InfiniFlow Inc.
+  It combines deep document understanding (DeepDoc parsing of PDFs, images, tables and scanned files)
+  with hybrid retrieval — dense vector search, BM25 full-text and tensor/multi-vector re-ranking — and
+  an integrated visual agent platform, to serve as a context layer for LLM applications. The platform
+  ships as an Apache-2.0 self-hosted Docker deployment and as RAGFlow Cloud, a hosted multi-tenant service.
+  Its RESTful HTTP API covers dataset (knowledge base) management, document ingestion and parsing, chunk
   management, retrieval, chat assistants, sessions, agents, memory, workspace file versioning and search
-  apps, plus an OpenAI-compatible chat-completions surface. A first-party Python SDK and an optional
-  self-hosted Model Context Protocol server expose the same retrieval core to agents.
+  apps, plus an OpenAI-compatible chat-completions surface. A first-party Python SDK and an optional self-hosted
+  Model Context Protocol server expose the same retrieval core to agents.
 url: https://raw.githubusercontent.com/api-evangelist/ragflow/refs/heads/main/apis.yml
 deliveryModel:
   model: unknown
@@ -70,14 +69,13 @@ tags_raw:
 - LLM
 - Model Context Protocol
 apis:
-- aid: ragflow-http-api
+- aid: ragflow:ragflow-http-api
   name: RAGFlow HTTP API
-  description: >-
-    The RAGFlow RESTful HTTP API — 95 documented operations under /api/v1, authenticated with a
-    tenant API key carried as a bearer token. Covers dataset management, document upload / parse /
-    ingest, chunk management, retrieval, chat assistants, sessions, agents, memory, file and
-    workspace-commit management, search apps, and an OpenAI-compatible chat-completions endpoint.
-    Documented as a human reference; no machine-readable OpenAPI is published.
+  description: The RAGFlow RESTful HTTP API — 95 documented operations under /api/v1, authenticated with
+    a tenant API key carried as a bearer token. Covers dataset management, document upload / parse / ingest,
+    chunk management, retrieval, chat assistants, sessions, agents, memory, file and workspace-commit
+    management, search apps, and an OpenAI-compatible chat-completions endpoint. Documented as a human
+    reference; no machine-readable OpenAPI is published.
   humanURL: https://ragflow.io/docs/http_api_reference
   baseURL: https://cloud.ragflow.io/api/v1
   tags:
