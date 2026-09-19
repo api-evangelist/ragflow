@@ -47,7 +47,7 @@ modified: '2026-08-27'
 tags:
 - Company
 - Artificial Intelligence
-- Retrieval Augmented Generation
+- RAG
 - Search
 - Vector Database
 - Document Processing
@@ -79,6 +79,11 @@ apis:
   humanURL: https://ragflow.io/docs/http_api_reference
   baseURL: https://cloud.ragflow.io/api/v1
   tags:
+  - RAG
+  - Search
+  - Document Processing
+  - Agents
+  tags_raw:
   - Retrieval Augmented Generation
   - Search
   - Document Processing
