@@ -51,9 +51,9 @@ tags:
 - Search
 - Vector Database
 - Document Processing
-- Knowledge-Management
+- Knowledge Management
 - Agents
-- Open-Source
+- Open Source
 - LLM
 - MCP
 tags_raw:
@@ -68,6 +68,8 @@ tags_raw:
 - Open Source
 - LLM
 - Model Context Protocol
+- Knowledge-Management
+- Open-Source
 apis:
 - aid: ragflow:ragflow-http-api
   name: RAGFlow HTTP API
