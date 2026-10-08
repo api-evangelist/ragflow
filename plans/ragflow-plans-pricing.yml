@@ -91,3 +91,45 @@ gaps:
 - No definition of a credit in terms of documents parsed, chunks indexed or tokens consumed.
 - Free tier cannot issue an API key, so the API cannot be evaluated without a paid plan or a self-hosted
   deployment.
+x-canonical:
+  generated: '2026-10-08'
+  vocabulary: all/0-working/economics/plans-canonical.yml
+  models:
+  - free
+  - hybrid
+  - metered
+  units: []
+  plans:
+  - name: Free
+    access: other
+    model: metered
+    model_how: derived
+    units: []
+    periods:
+    - month
+  - name: Starter
+    access: other
+    model: hybrid
+    model_how: derived
+    units: []
+    periods:
+    - month
+  - name: Pro
+    access: other
+    model: hybrid
+    model_how: derived
+    units: []
+    periods:
+    - month
+  - name: Enterprise
+    access: other
+    model: metered
+    model_how: derived
+    units: []
+    periods: []
+  - name: Self-hosted (Apache-2.0)
+    access: other
+    model: free
+    model_how: derived
+    units: []
+    periods: []
